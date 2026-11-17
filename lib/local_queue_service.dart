@@ -123,17 +123,42 @@ class LocalQueueService {
     );
   }
 
+  /// Remplace l'identifiant temporaire local par l'ID auto-incrémenté distant.
+  Future<void> replaceClientId(String oldId, String newId) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      final remoteRow = await txn.query(
+        tableName,
+        where: 'id = ?',
+        whereArgs: [newId],
+        limit: 1,
+      );
+      if (remoteRow.isNotEmpty) {
+        await txn.delete(tableName, where: 'id = ?', whereArgs: [oldId]);
+        await txn.update(
+          tableName,
+          {'is_synced': 1},
+          where: 'id = ?',
+          whereArgs: [newId],
+        );
+      } else {
+        await txn.update(
+          tableName,
+          {'id': newId, 'is_synced': 1},
+          where: 'id = ?',
+          whereArgs: [oldId],
+        );
+      }
+    });
+  }
+
   /// Supprime un client de la base locale par son [id].
   ///
   /// Cette opération est irréversible localement. La suppression distante
   /// est gérée séparément par [QueueProvider.removeClient].
   Future<void> deleteClient(String id) async {
     final db = await database;
-    await db.delete(
-      tableName,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete(tableName, where: 'id = ?', whereArgs: [id]);
   }
 
   /// Ferme la connexion à la base de données et réinitialise le singleton.

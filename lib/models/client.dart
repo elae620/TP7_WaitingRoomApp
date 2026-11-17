@@ -2,14 +2,14 @@
 /// Modèle de données représentant un client dans la file d'attente.
 ///
 /// Chaque client possède :
-/// - un identifiant unique [id] (UUID v4)
+/// - un identifiant unique [id] (attribué par Supabase après synchronisation)
 /// - un [name] (nom affiché dans la liste)
 /// - des coordonnées GPS optionnelles [lat] / [lng]
 /// - un horodatage [createdAt] (UTC)
 /// - un flag [isSynced] indiquant si l'enregistrement a été envoyé à Supabase
 /// {@endtemplate}
 class Client {
-  /// Identifiant unique du client (UUID v4).
+  /// Identifiant unique du client (temporaire localement, puis attribué par Supabase).
   final String id;
 
   /// Nom du client tel que saisi par l'utilisateur.
